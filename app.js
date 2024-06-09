@@ -31,6 +31,6 @@ app.post('/upload', upload.single('image'), (req, res) => {
   return res.json({ hash: req.file.filename });
 });
 
-app.listen(() => {
+app.listen(3000, () => {
   console.log(`Server is running`);
 });
