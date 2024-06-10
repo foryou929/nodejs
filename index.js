@@ -11,7 +11,11 @@ app.use(cors());
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/');
+    const uploadDir = path.join(process.cwd(), 'public', 'uploads');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, 'public/uploads/');
   },
   filename: (req, file, cb) => {
     const hash = crypto.randomBytes(16).toString('hex');
@@ -22,14 +26,9 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(path.join(process.cwd(), 'public', 'uploads')));
 
-app.post('/upload', upload.single('image'), (req, res) => {
-  const uploadDir = path.join(__dirname, 'uploads');
-  if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir);
-  }
-
+app.post('/api/upload', upload.single('image'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'No file uploaded' });
   }
@@ -37,6 +36,11 @@ app.post('/upload', upload.single('image'), (req, res) => {
   return res.json({ hash: req.file.filename });
 });
 
-app.listen(3000, () => {
-  console.log(`Server is running`);
+app.use((req, res) => {
+  res.status(404).json({ error: 'Route not found' });
+});
+
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
 });
