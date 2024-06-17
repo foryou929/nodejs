@@ -1,39 +1,25 @@
 const express = require('express');
-const multer = require('multer');
-const crypto = require('crypto');
 const path = require('path');
 const cors = require('cors');
-const fs = require('fs');
 
 const app = express();
 
 app.use(cors());
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
+app.post('/api/upload', async (req, res) => {
+  const form = new formidable.IncomingForm();
+  form.uploadDir = path.join(process.cwd(), 'public', 'uploads');
+  form.keepExtensions = true;
+
+  form.parse(req, async (err, fields, files) => {
+    if (err) {
+      console.error(err);
+      return res.status(400).json({ error: 'Error uploading file' });
     }
-    cb(null, 'public/uploads/');
-  },
-  filename: (req, file, cb) => {
-    const hash = crypto.randomBytes(16).toString('hex');
-    const fileExtension = path.extname(file.originalname);
-    cb(null, `${hash}${fileExtension}`);
-  },
-});
 
-const upload = multer({ storage });
-
-app.use('/uploads', express.static(path.join(process.cwd(), 'public', 'uploads')));
-
-app.post('/api/upload', upload.single('image'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ error: 'No file uploaded' });
-  }
-
-  return res.json({ hash: req.file.filename });
+    const filePath = path.join('/uploads', files.file.newFilename);
+    return res.status(200).json({ url: filePath });
+  });
 });
 
 app.use((req, res) => {
