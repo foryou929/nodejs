@@ -18,7 +18,6 @@ app.post('/api/upload', async (req, res) => {
       return res.status(400).json({ error: 'Error uploading file' });
     }
 
-    console.log(files);
     const filePath = path.join('/uploads', files.file[0].newFilename);
     return res.status(200).json({ url: filePath });
   });
