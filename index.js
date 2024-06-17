@@ -9,7 +9,7 @@ app.use(cors());
 
 app.post('/api/upload', async (req, res) => {
   const form = new formidable.IncomingForm();
-  form.uploadDir = path.join(process.cwd(), 'public', 'uploads');
+  form.uploadDir = path.join(process.cwd(), 'public');
   form.keepExtensions = true;
 
   form.parse(req, async (err, fields, files) => {
@@ -18,8 +18,7 @@ app.post('/api/upload', async (req, res) => {
       return res.status(400).json({ error: 'Error uploading file' });
     }
 
-    const filePath = path.join('/uploads', files.file[0].newFilename);
-    return res.status(200).json({ url: filePath });
+    return res.status(200).json({ url: files.file[0].newFilename });
   });
 });
 
