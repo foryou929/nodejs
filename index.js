@@ -8,8 +8,14 @@ const app = express();
 app.use(cors());
 
 app.post('/api/upload', async (req, res) => {
+  const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+  }
+
   const form = new formidable.IncomingForm();
-  form.uploadDir = path.join(process.cwd(), 'public');
+  form.uploadDir = path.join(process.cwd(), 'public', 'uploads');
   form.keepExtensions = true;
 
   form.parse(req, async (err, fields, files) => {
@@ -18,7 +24,8 @@ app.post('/api/upload', async (req, res) => {
       return res.status(400).json({ error: 'Error uploading file' });
     }
 
-    return res.status(200).json({ url: files.file[0].newFilename });
+    const filePath = path.join('/uploads', files.file.newFilename);
+    return res.status(200).json({ url: filePath });
   });
 });
 
