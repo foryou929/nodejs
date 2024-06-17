@@ -2,6 +2,7 @@ const express = require('express');
 const formidable = require('formidable');
 const path = require('path');
 const cors = require('cors');
+const fs = require('fs');
 
 const app = express();
 
@@ -24,7 +25,8 @@ app.post('/api/upload', async (req, res) => {
       return res.status(400).json({ error: 'Error uploading file' });
     }
 
-    const filePath = path.join('/uploads', files.file.newFilename);
+    const fileExtension = path.extname(files.file[0].originalFilename);
+    const filePath = path.join('/uploads', `${files.file[0].newFilename}${fileExtension}`);
     return res.status(200).json({ url: filePath });
   });
 });
